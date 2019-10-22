@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+    <meta charset='UTF-8' />
+    <title>Halloween Party Cup Team Checker</title>
+    <link rel='stylesheet' href='styles.css' />
+</head>
+
+<body>
+    <h1>Halloween Party Cup Team Checker</h1>
+    <label for="pokemonInputBox">Choose your Pokemon</label><br>
+    <input type="text" name="pokemonInputBox" id="pokemonInputBox" list="pokemonDropdown">
+    <datalist id="pokemonDropdown">
+    </datalist>
+    <button type="button" id="addPokemonButton" name="addPokemon">+</button><br>
+    <div id="teamDisplayDiv"></div><br><br><br><br><br><br>
+</body>
+<footer>Icons by The Artificial</footer>
+
+</html>
+<script>
+    var dropdown = document.getElementById('pokemonDropdown');
+    dropdown.length = 0;
+
+    var t0 = ["Tyranitar", "Umbreon", "Sableye", "Golbat"].map(v => v.toLowerCase());
+    var t1 = ["Drapion", "Forretress", "Scizor", "Wormadam-Trash", "Qwilfish", "Toxicroak", "Crobat", "Muk"].join('|').toLowerCase().split('|');
+    var t2 = ["Raticate-Alolan", "Haunter", "Spiritomb", "Houndoom", "Sharpedo", "Marowak-Alolan", "Muk-Alolan", "Skuntank", "Sneasel"].join('|').toLowerCase().split('|');
+
+    var team = [];
+
+
+    const pokemonListUrl = "pokemoncurrent.json";
+    fetch(pokemonListUrl)
+        .then(
+            function (response) {
+                if (response.status !== 200) {
+                    console.warn('Looks like there was a problem. Status Code: ' +
+                        response.status);
+                    return;
+                }
+
+                // Examine the text in the response  
+                response.json().then(function (data) {
+                    let option;
+
+                    for (let i = 0; i < data.length; i++) {
+                        let option = document.createElement('option');
+                        option.text = data[i];
+                        option.value = data[i];
+                        dropdown.appendChild(option);
+                    }
+                });
+            }
+        )
+        .catch(function (err) {
+            console.error('Fetch Error -', err);
+        });
+
+    document.getElementById("addPokemonButton").addEventListener("click", function () {
+        let pokemon = document.getElementById("pokemonInputBox").value;
+
+        team[pokemon] = getPoints(pokemon);
+        document.getElementById("teamDisplayDiv").innerHTML = displayTeam();
+        document.getElementById("pokemonInputBox").value = "";
+        //activateRemoveButtons();
+
+
+    }, false);
+
+    function getPoints(poke) {
+        if (t0.includes(poke.toLowerCase())) return 3;
+        else if (t1.includes(poke.toLowerCase())) return 2;
+        else if (t2.includes(poke.toLowerCase())) return 1;
+        else return 0;
+    }
+
+    function displayTeam() {
+        let output = "";
+        for (let member in team) {
+            output += "<img src='pokemon-icons/PNG/1x/" + member.toLowerCase() + ".png'> " + member + " : " + team[member] + " points <button type='button' id='" + member + "' onclick='removePokemon(\"" + member + "\")'>-</button><br>";
+
+        }
+
+        output += "<br><h3>Total Shots🥃: " + getTotalPoints() + "<h3>";
+
+        return output;
+    }
+
+    function getTotalPoints() {
+        let output = 0;
+        for (let member in team) {
+            output += team[member];
+        }
+
+        return output;
+    }
+
+    function removePokemon(poke) {
+        delete team[poke];
+        document.getElementById("teamDisplayDiv").innerHTML = displayTeam();
+    }
+
+
+
+
+    //})
+</script>
